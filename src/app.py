@@ -71,13 +71,42 @@ if show_means == "Yes":
                color="red", label="Class Means")
 
 #st.pyplot(m_fig)
-# In Plotly
 
+# In Plotly
 p_fig = px.scatter(reduced_df, x='displ', y='hwy', opacity=0.5,
                    range_x=[1, 8], range_y=[10, 50],
                    width=750, height=600,
                    labels={"displ": "Displacement (Liters)",
                            "hwy": "MPG"},
                    title="Engine Size vs. Highway Fuel Mileage")
-
 p_fig.update_layout(title_font_size=22)
+
+if show_means == "Yes":
+    p_fig.add_trace(go.Scatter(x=means['displ'], y=means['hwy'],
+                               mode="markers"))
+    p_fig.update_layout(showlegend=False)
+
+#st.plotly_chart(p_fig)
+
+if plot_type == "Matplotlib":
+    st.pyplot(m_fig)
+else:
+    st.plotly_chart(p_fig)
+
+# We can write stuff
+url = "https://archive.ics.uci.edu/ml/datasets/auto+mpg"
+st.write("Data Source:", url)
+# "This works too:", url
+
+# Sample Streamlit Map
+st.subheader("Streamlit Map")
+ds_geo = px.data.carshare()
+
+
+
+ds_geo['lat'] = ds_geo['centroid_lat']
+ds_geo['lon'] = ds_geo['centroid_lon']
+
+st.dataframe(ds_geo.head())
+
+st.map(ds_geo)
