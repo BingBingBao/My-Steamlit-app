@@ -1,64 +1,51 @@
 import streamlit as st
 import pandas as pd
-from copy import deepcopy
 import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
+from urllib.request import urlopen
+import json
+from copy import deepcopy
 
-
-st.text('I change smth')
-
-# mpg_df = pd.read_csv("./data/raw/mpg.csv")
-# mpg_df
-
-@st.cache_data # decorator  ????
+@st.cache_data
 def load_data(path):
     df = pd.read_csv(path)
     return df
 
+# First some MPG Data Exploration
 mpg_df_raw = load_data(path="./data/raw/mpg.csv")
+mpg_df = deepcopy(mpg_df_raw)
 
-# 
-mpg_df =deepcopy(mpg_df_raw) # for security
+# Add title and header
+st.title("Introduction to Streamlit")
+st.header("MPG Data Exploration")
 
-# see my df
-# st.dataframe(data=mpg_df)
-# create a side bar
+#st.table(data=mpg_df)
+if st.checkbox("Show Dataframe"):
 
-if st.sidebar.checkbox("Show dataframe:"):
+    st.subheader("This is my dataset:")
     st.dataframe(data=mpg_df)
 
-# See a title
-st.title('My 1st version')
-st.header('MPG data exploration')
+#left_column, right_column = st.columns(2)
+left_column, middle_column, right_column = st.columns([3, 1, 1])
 
-# create cols
-col1, col2 = st.columns(2)
-col1.write('Column 1')
-col2.write('Column 2')
-
-# 添加的新代码
-left_column, middle_column, right_column = st.columns(3)
+years = ["All"]+sorted(pd.unique(mpg_df['year']))
+year = left_column.selectbox("Choose a Year", years)
 
 show_means = middle_column.radio(
-    'Show Class Means', ['Yes', 'No']
-)
+    label='Show Class Means', options=['Yes', 'No'])
 
-# 选择年份的部分
-years = ["All"] + sorted(pd.unique(mpg_df['year']))
-year = left_column.selectbox("Choose a year", years)
+plot_types = ["Matplotlib", "Plotly"]
+plot_type = right_column.radio("Choose Plot Type", plot_types)
 
-# 根据选择的年份过滤数据
+# st.write(show_means)
+
 if year == "All":
     reduced_df = mpg_df
 else:
     reduced_df = mpg_df[mpg_df["year"] == year]
 
-#计算各类的平均值
 means = reduced_df.groupby('class').mean(numeric_only=True)
-
-# 定义绘图类型
-plot_types = ["Matplotlib", "Plotly"]
-plot_type = right_column.radio("Choose a plot type", plot_types)
 
 m_fig, ax = plt.subplots(figsize=(10, 8))
 ax.scatter(reduced_df['displ'], reduced_df['hwy'], alpha=0.7)
